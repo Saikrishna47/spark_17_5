@@ -25,9 +25,9 @@ object matching
     
     orderDF=orderDF.withcolumn("orderbook",where(col("OrderType")!="1",lit("open")))
     
-    var finalPriceDF= orderDF.when(col("OrderType")=="BUY").groupby("OrderID","OrderType").min("price").withcolumnrenamed("min","finalPrice").select("*")
+    var finalPriceDF= orderDF.filter(col("OrderType")=="BUY").groupby("OrderID","OrderType").min("price").withcolumnrenamed("min","finalPrice").select("*")
    
-    finalPriceDF.when(col("OrderType")=="SELL").groupby("OrderID","OrderType").max("price").withcolumnrenamed("max","finalPrice").select("*")
+    finalPriceDF.filter(col("OrderType")=="SELL").groupby("OrderID","OrderType").max("price").withcolumnrenamed("max","finalPrice").select("*")
     
     val ouputDF = finalPriceDF.withcolumn("rank", row_number().over(window.partitionBy("OrderID").orderBy("OrderType"))).distinct("OrderTime")
     .select("OrderID","rank","OrderTime","Quantity","finalPrice")
